@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尼克星的冒險生活 RPG</title>
+    <title>尼克星的冒險生活 RPG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4e8e9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #89565b;
+            /* 全域文字色 */
+        }
+
+        /* 狀態欄 */
+        .status-panel {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            width: 160px;
+            border: 1px solid #89565b;
+            border-radius: 18px;
+            padding: 15px;
+            background: #fefefe;
+            font-size: 14px;
+            z-index: 10;
+            display: none;
+        }
+
+        .status-panel p {
+            margin: 4px 0;
+        }
+
+        .status-panel span {
+            font-weight: bold;
+        }
+
+        .status-panel h3 {
+            margin-top: 0;
+            color: #89565b;
+        }
+
+        /* 標題 */
+        h1 {
+            margin-top: 60px;
+            font-size: 36px;
+            text-align: center;
+            letter-spacing: 1px;
+            transition: all 0.5s ease;
+            color: #89565b;
+        }
+
+        .fixed-image {
+            max-width: 200px;
+            border-radius: 12px;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.5s ease;
+        }
+
+        .rule-box {
+            font-size: 15px;
+            color: #a58588;
+            background: #f7f7f7;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            line-height: 1.6;
+            border: 1px solid #89565b;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        #start-button {
+            margin-top: 15px;
+        }
+
+        .action-panel {
+            border-radius: 12px;
+            padding: 20px;
+            background: #fefefe;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            max-width: 480px;
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 12px 22px;
+            margin: 8px 4px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background: #c2878b;
+            color: #fff;
+            font-size: 16px;
+            transition: 0.2s;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .button:hover {
+            background: #d3999d;
+        }
+
+        #event-description {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            letter-spacing: 0.8px;
+            color: #89565b;
+        }
+
+        .result-panel {
+            min-height: 60px;
+            font-size: 16px;
+            margin-top: 16px;
+            padding-top: 0;
+            color: #89565b;
+            text-align: left;
+            line-height: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .bold-text {
+            font-weight: bold;
+            color: #89565b;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 狀態欄 -->
+    <div class="status-panel" id="nick-status">
+        <h3>狀態</h3>
+        <p>體力: <span id="energy">80</span>/100</p>
+        <p>人氣: <span id="popularity">70</span>/100</p>
+        <p>鄰居忍受度: <span id="skill">60</span>/100</p>
+    </div>
+
+    <!-- 標題 -->
+    <h1 id="game-title">尼克星的冒險生活 RPG</h1>
+
+    <!-- 尼克星圖片 -->
+    <img src="c.png" alt="尼克星" class="fixed-image" id="nick-image">
+
+    <!-- 遊戲規則文字 + 開始按鈕 -->
+    <div class="rule-box" id="start-screen">
+        🎲 選擇行動後擲骰子決定結果！<br>
+        扮演尼克星，每次行動會影響體力、人氣與鄰居忍受程度，做好策略安排吧！<br>
+        <button id="start-button" class="button" onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <!-- 行動區 -->
+    <div class="action-panel" id="game-panel">
+        <p id="event-description">尼克星準備開啟今日行程！</p>
+        <div>
+            <button class="button" onclick="chooseAction('冒險')">星拌麵推廣活動</button>
+            <button class="button" onclick="chooseAction('直播')">開直播互動</button>
+            <button class="button" onclick="chooseAction('休息')">好好休息</button>
+        </div>
+        <div class="result-panel" id="result"></div>
+    </div>
+
+    <script>
+        let nick = { energy: 80, popularity: 70, skill: 60 };
+
+        const events = {
+            "冒險": ["辦星拌麵試吃會超辣挑戰", "帶著星拌麵上街跟粉絲合照推廣", "星拌麵試吃 PK 挑戰賽，人氣爆表"],
+            "直播": ["大叫被鄰居敲門", "約會妙智被煞車", "和觀眾對戰傳說對決被打爆"],
+            "休息": ["睡個覺", "吃個星拌麵", "私下玩傳說對決放鬆一下"]
+        };
+
+        function updateStatus() {
+            document.getElementById("energy").textContent = nick.energy;
+            document.getElementById("popularity").textContent = nick.popularity;
+            document.getElementById("skill").textContent = nick.skill;
+        }
+
+        function startGame() {
+            document.getElementById("game-panel").style.display = "block";
+            document.getElementById("nick-status").style.display = "block";
+            document.getElementById("start-screen").style.display = "none";
+
+            // 標題圖片縮小
+            const title = document.getElementById("game-title");
+            const image = document.getElementById("nick-image");
+            title.style.fontSize = "30px";  // 標題縮小
+            image.style.maxWidth = "140px"; // 圖片縮小
+            image.style.marginTop = "10px";
+
+            updateStatus();
+        }
+
+        function chooseAction(action) {
+            if (nick.energy <= 0 || nick.popularity >= 100) return;
+
+            // 事件文字直接更新
+            let eventDesc = events[action][Math.floor(Math.random() * events[action].length)];
+            document.getElementById("event-description").textContent = `事件：${eventDesc}`;
+
+            let dice = Math.floor(Math.random() * 20) + 1;
+            let resultLines = [`你投出骰子: ${dice}！`];
+
+            if (dice <= 5) {
+                if (action === "冒險") { nick.energy -= 15; nick.popularity -= 5; resultLines.push("推廣有點慘，被粉絲吐槽😵"); }
+                else if (action === "直播") { nick.popularity -= 10; resultLines.push("直播當機，人氣下降😳"); }
+                else { nick.energy += 3; resultLines.push("休息太少，還是累累💤"); }
+            } else if (dice <= 15) {
+                if (action === "冒險") { nick.energy -= 20; nick.popularity += 5; resultLines.push("推廣順利，人氣小升😊"); }
+                else if (action === "直播") { nick.popularity += 5; nick.energy -= 10; nick.skill -= 10; resultLines.push("直播氣氛不錯👍"); }
+                else { nick.energy += 10; nick.skill += 10; resultLines.push("休息夠，元氣回來💪"); }
+            } else {
+                if (action === "冒險") { nick.energy -= 25; nick.popularity += 10; resultLines.push("星拌麵爆紅🔥"); }
+                else if (action === "直播") { nick.energy -= 20; nick.popularity += 5; nick.skill -= 20; resultLines.push("你瘋狂大叫，人氣爆棚✨"); }
+                else { nick.energy += 15; nick.skill += 15; resultLines.push("完美休息，活力滿滿💥"); }
+            }
+
+            nick.energy = Math.min(Math.max(nick.energy, 0), 100);
+            nick.popularity = Math.min(Math.max(nick.popularity, 0), 100);
+            nick.skill = Math.min(Math.max(nick.skill, 0), 100);
+            updateStatus();
+
+            // 結果淡入
+            let resultEl = document.getElementById("result");
+            resultEl.style.opacity = 0;
+            setTimeout(() => {
+                if (nick.energy <= 0) { resultLines.push('<span class="bold-text">失敗！😴 你過勞倒下了… 遊戲結束.</span>'); resultLines.push('<img src="d.png" style="max-width:100px; margin-top:8px;">'); }
+                else if (nick.skill <= 0) { resultLines.push('<span class="bold-text">失敗！😴 你被報警抓走… 遊戲結束.</span>'); resultLines.push('<img src="a.png" style="max-width:100px; margin-top:8px;">'); }
+                else if (nick.popularity >= 100) { resultLines.push('<span class="bold-text">🎉 你成為人氣主播了！遊戲勝利！</span>'); resultLines.push('<img src="e.png" style="max-width:100px; margin-top:8px;">'); }
+
+                resultEl.innerHTML = resultLines.join("<br>");
+                resultEl.style.opacity = 1;
+            }, 100);
+        }
+    </script>
+</body>
+
+</html>
